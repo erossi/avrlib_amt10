@@ -1,3 +1,6 @@
 [submodule "lib/avrlib_arduino_led"]
 	path = lib/avrlib_arduino_led
 	url = https://github.com/erossi/avrlib_arduino_led.git
+[submodule "lib/avrlib_usart"]
+	path = lib/avrlib_usart
+	url = https://github.com/erossi/avrlib_usart.git

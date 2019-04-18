@@ -27,6 +27,11 @@ OPTLEV = 2
 PWD = $(shell pwd)
 LIBDIR = $(wildcard ../lib/*/src)
 VPATH += $(wildcard ../lib/*/src)
+
+# Usart demo lib
+LIBDIR += ../lib/avrlib_usart/cpp
+VPATH += ../lib/avrlib_usart/cpp
+
 BUILD_DIR = ./build
 INC = /usr/lib/avr/include
 CINC = $(addprefix -I, $(INC) $(LIBDIR))
@@ -101,18 +106,31 @@ $(BUILD_DIR):
 ### Libraries
 common_o := \
 	amt10.o \
-	arduino_led.o
+	arduino_led.o \
+	usart_base.o
 
 ### Tests
 # in dependancy order
 #
 test: \
-	test_arduino_led
+	test_arduino_led \
+	test_arduino_usart
 
-## Power Test
+## Led Test
 # depends:
+#  - arduino led
 #
 test_arduino_led: $(common_o)
+	$(Pecho) "  CXX   $@"
+	$P $(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/$@.elf $@.cpp \
+		$(addprefix $(BUILD_DIR)/, $(common_o)) \
+		$(LFLAGS)
+
+## Usart Test
+# depends:
+#  - usart I/O
+#
+test_arduino_usart: $(common_o)
 	$(Pecho) "  CXX   $@"
 	$P $(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/$@.elf $@.cpp \
 		$(addprefix $(BUILD_DIR)/, $(common_o)) \
