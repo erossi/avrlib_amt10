@@ -16,18 +16,29 @@
  */
 
 #include <avr/interrupt.h>
-#include "amt10.h"
+#include "amt10b.h"
 
 // Globals for IRQ usage
 volatile long int AMT10::steps { 0 };
+volatile bool AMT10::flag { false };
 
 /*! IRQ wakes up when chip send an IRQ. */
 ISR(INT0_vect)
 {
-	if (PIND & (1 << PIND3))
-		AMT10::steps++;
-	else
-		AMT10::steps--;
+	if (AMT10::flag) {
+		if (PIND & (1 << PIND3))
+			AMT10::steps++;
+		else
+			AMT10::steps--;
+
+		AMT10::flag = false;
+	}
+}
+
+//
+ISR(INT1_vect)
+{
+	AMT10::flag = true;
 }
 
 void AMT10::resume()
@@ -36,13 +47,13 @@ void AMT10::resume()
 	EICRA |= (1 << ISC01) | (1 << ISC00);
 
 	// Enable irq0
-	EIMSK |= (1 << INT0);
+	EIMSK |= (1 << INT1) | (1 << INT0);
 }
 
 void AMT10::suspend()
 {
-	// disable irq0
-	EIMSK &= ~(1 << INT0);
+	// disable irq 1 and irq0
+	EIMSK &= ~((1 << INT1) | (1 << INT0));
 
 	// disable triggers
 	EICRA &= ~((1 << ISC01) | (1 << ISC00));

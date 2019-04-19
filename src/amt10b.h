@@ -15,40 +15,18 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <avr/interrupt.h>
-#include "amt10.h"
+/*!
+ * \file amt10b.h
+ * \brief Int0 and Int1 version
+ *
+ */
 
-// Globals for IRQ usage
-volatile long int AMT10::steps { 0 };
-
-/*! IRQ wakes up when chip send an IRQ. */
-ISR(INT0_vect)
-{
-	if (PIND & (1 << PIND3))
-		AMT10::steps++;
-	else
-		AMT10::steps--;
-}
-
-void AMT10::resume()
-{
-	// Trigger irq on rising edge of the INTn PIN
-	EICRA |= (1 << ISC01) | (1 << ISC00);
-
-	// Enable irq0
-	EIMSK |= (1 << INT0);
-}
-
-void AMT10::suspend()
-{
-	// disable irq0
-	EIMSK &= ~(1 << INT0);
-
-	// disable triggers
-	EICRA &= ~((1 << ISC01) | (1 << ISC00));
-}
-
-void AMT10::clear()
-{
-	steps = 0;
-}
+class AMT10 {
+	public:
+		static volatile bool flag;
+		static volatile long int steps;
+		static void init();
+		static void suspend();
+		static void resume();
+		static void clear();
+};
